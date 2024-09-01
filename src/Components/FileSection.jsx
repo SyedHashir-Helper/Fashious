@@ -6,7 +6,9 @@ import { ProgressBar } from 'primereact/progressbar';
 import { Tooltip } from 'primereact/tooltip';
 import { Tag } from 'primereact/tag';
 import { UploadDropzone } from "@bytescale/upload-widget-react";
-import {Row, Col, Button, Flex, Divider} from 'antd'
+import {Row, Col, Button, Flex, Divider,Spin,message} from 'antd'
+import { locale } from 'primereact/api';
+import axios from 'axios'
 
 const options = {
     apiKey: "public_FW25cBk8bJZGqwaNxFuyEHKVXCPq", // This is your API key.
@@ -16,10 +18,83 @@ const options = {
       colors: {
         primary: "#982B1C"
       }
+    },
+
+    locale: {
+        "uploadFileBtn": "Upload an image",
     }
   };
 
-export default function FileSection() {
+  
+const API_BASE_URL = "http://127.0.0.1:5000"
+
+
+export default function FileSection({setreplicateURLs, }) {
+    const [garmentFile, setgarmentFile] = useState("")
+    const [modelFile, setmodelFile] = useState("")
+    const [garmentUploaded, setGarmentUploaded] = useState(false);
+    const [modelUploaded, setModelUploaded] = useState(false);
+    const [loading,setloading] = useState(false)
+    const [generating, setgenerating] = useState("Generate")
+    const [messageApi, contextHolder] = message.useMessage();
+
+    const success = (successmsg) => {
+        messageApi.open({
+          type: 'success',
+          content: successmsg,
+          duration: 5
+        });
+      };
+
+      const error = (errmsg) => {
+        messageApi.open({
+          type: 'error',
+          content: errmsg,
+        });
+      };
+
+    async function handleClick(){
+        if (garmentFile!=""){
+            if(modelFile!=""){
+                try{
+
+                    success("It takes upto 3 minutes. Take a back")
+                    setloading(true)
+                    setgenerating("Generating...")
+                    const response = await axios.post(`${API_BASE_URL}/api/transform_image`, {
+                        model_image_url: modelFile,
+                        garment_image_url: garmentFile
+                    });
+                    console.log(response["data"])
+                    setreplicateURLs(response["data"])
+                    setfilesAvailable(true)
+                }
+                catch(error)
+                {
+                    error("Error: " + error.message)
+                }
+                finally{
+                    setloading(false)
+                    setgenerating("Generate")
+                    success("Image Generated Successfully")
+                }
+
+                
+            }
+            else{
+                alert("Please select a model file to upload")
+            }
+        }
+        else{
+            alert("Please Select a garment file to upload")
+        }
+    }
+    async function handleRefresh(){
+        setgarmentFile("")
+        setmodelFile("")
+        setGarmentUploaded(false);
+        setModelUploaded(false);
+    }
     // const toast = useRef(null);
     // const [totalSize, setTotalSize] = useState(0);
     // const fileUploadRef = useRef(null);
@@ -106,6 +181,7 @@ export default function FileSection() {
 
     return (
         <Row justify={'space-between'} style={{ margin: "1% 0%"}} gutter={10}>
+            {contextHolder}
             <Col lg={12} md={12} sm={24} xs={24}>
                 <Row justify={'center'} style={{
                      fontSize: "2em", background: "#982B1C",borderRadius: "5px",padding: "0.25em 0em", color: "white"
@@ -117,13 +193,27 @@ export default function FileSection() {
                         Garment
                     </span>
                 </Row>
-                <Row>
+                <Row justify={"center"} align={'middle'}>
+                    
 
-                    <UploadDropzone options={options}
-                    onUpdate={({ uploadedFiles }) => console.log(uploadedFiles.map(x => x.fileUrl).join("\n"))}
-                    onComplete={files => alert(files.map(x => x.fileUrl).join("\n"))}
-                    width="100%"
-                    height="30em" />
+                    {!garmentUploaded && (
+                        
+                        <UploadDropzone
+                                options={options}
+                                onUpdate={({ uploadedFiles }) => console.log(uploadedFiles.map(x => x.fileUrl).join("\n"))}
+                                onComplete={files => {
+                                    setgarmentFile(files[0].fileUrl);
+                                    setGarmentUploaded(true);
+                                }}
+                                width="100%"
+                                height="30em" />
+                        )}
+                    {
+                            garmentUploaded && (
+                            <Col md={12} sm={24} style={{height: "30em", objectFit: "cover", padding: "1em"}}>
+                                <img src={garmentFile} style={{height: "95%"}}/>
+                            </Col>
+                        )}
                 </Row>
             </Col>
             <Col lg={12} md={12} sm={24} xs={24}>
@@ -137,13 +227,24 @@ export default function FileSection() {
                             Human Model
                         </span>
                     </Row>
-                    <Row>
-
-                        <UploadDropzone options={options}
-                            onUpdate={({ uploadedFiles }) => console.log(uploadedFiles.map(x => x.fileUrl).join("\n"))}
-                            onComplete={files => alert(files.map(x => x.fileUrl).join("\n"))}
-                            width="100%"
-                            height="30em" />
+                    <Row  justify={"center"} align={'middle'}>
+                        {!modelUploaded && (
+                            <UploadDropzone
+                                options={options}
+                                onUpdate={({ uploadedFiles }) => console.log(uploadedFiles.map(x => x.fileUrl).join("\n"))}
+                                onComplete={files => {
+                                    setmodelFile(files[0].fileUrl);
+                                    setModelUploaded(true);
+                                }}
+                                width="100%"
+                                height="30em" />
+                        )}
+                        {
+                            modelUploaded && (
+                            <Col md={12} sm={24} style={{height: "30em", objectFit: "cover", padding: "1em"}}>
+                                <img src={modelFile} style={{height: "95%"}}/>
+                            </Col>
+                        )}
                     </Row>
             </Col>
             <Col span={24}>
@@ -151,12 +252,38 @@ export default function FileSection() {
                         <Col>
                             <Button danger type='primary' style={{display: "flex", alignItems: "center", justifyContent: "space-between", fontSize: "1.5em", padding: "1.5em",
                                 backgroundColor: "#982B1C", borderRadius: "5px", border: "none"
-                            }}>
-                                <span class="material-symbols-outlined">
-                                    animated_images
-                                </span>
+                            }}
+                            onClick={handleClick}
+                            >
+                                {
+                                    !loading ? (
+                                        <span class="material-symbols-outlined">
+                                            animated_images
+                                        </span>
+                                    ) :
+                                    (
+                                        <Spin>
+                                            
+                                        </Spin>
+                                    )
+                                }
                                 
-                                Generate
+
+                                
+                                {generating}
+                            </Button>
+                        </Col>
+                        <Col>
+                            <Button
+                                style={{
+                                    display: "flex", alignItems: "center", justifyContent: "space-between", fontSize: "1.5em", padding: "1.5em",
+                                    backgroundColor: "#982B1C", borderRadius: "5px", border: "none", marginLeft: "1em"
+                                }}
+                                onClick={handleRefresh}
+                            >
+                                <span className="material-symbols-outlined">
+                                    refresh
+                                </span>
                             </Button>
                         </Col>
                     </Row>
