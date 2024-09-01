@@ -26,7 +26,7 @@ const options = {
   };
 
   
-const API_BASE_URL = "http://127.0.0.1:5000"
+const API_BASE_URL = "https://fashious-flask-backend.vercel.app/"
 
 
 export default function FileSection({setreplicateURLs, }) {

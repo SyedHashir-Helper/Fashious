@@ -5,6 +5,7 @@ import FileSection from './Components/FileSection'
 import { Row ,Col} from 'antd'
 import ImageGradient from './Components/ImageGradient'
 import ReplicateImages from './Components/ReplicateImages'
+import axios from 'axios'
 
 const styles = [
 {backgroundImage: "linear-gradient(to right, #ffecd2 0%, #fcb69f 100%)"},
