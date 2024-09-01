@@ -13,28 +13,28 @@ const BackgroundGeneratedImages = ({pictureURL}) => {
                 const prompt = 'Red Shiny Gradient wallpaper';
 
                 // Call the /removebg endpoint
-                const removeBgResponse = await axios.post('http://127.0.0.1:5000/api/backgeneratorpic', {
+                const removeBgResponse = await axios.post('https://fashious-flask-backend.vercel.app/api/backgeneratorpic', {
                     image_url: imageUrl,
                     color: "#08eccd"
                 });
                 console.log(removeBgResponse.data)
                 const removeBgUrl = removeBgResponse.data.data["url"]; // Adjust based on API response structure
 
-                const secondResponse = await axios.post('http://127.0.0.1:5000/api/backgeneratorpic', {
+                const secondResponse = await axios.post('https://fashious-flask-backend.vercel.app/api/backgeneratorpic', {
                     image_url: imageUrl,
                     color: "#f2f2f2"
                 });
                 const secondURL = secondResponse.data.data["url"]; // Adjust based on API response structure
 
                 // Call the /generate-background endpoint
-                const generateBackgroundResponse = await axios.post('http://127.0.0.1:5000/api/generate-background', {
+                const generateBackgroundResponse = await axios.post('https://fashious-flask-backend.vercel.app/api/generate-background', {
                     image_url: imageUrl,
                     prompt: prompt
                 });
                 const generateBackgroundUrl = generateBackgroundResponse.data["result_url"]; // Adjust based on API response structure
                 console.log(generateBackgroundResponse.data)
 
-                const generateBackgroundLast = await axios.post('http://127.0.0.1:5000/api/generate-background', {
+                const generateBackgroundLast = await axios.post('https://fashious-flask-backend.vercel.app/api/generate-background', {
                     image_url: imageUrl,
                     prompt: "Shiny Gradient Background having positive vibes"
                 });
