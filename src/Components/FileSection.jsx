@@ -9,6 +9,58 @@ import { UploadDropzone } from "@bytescale/upload-widget-react";
 import {Row, Col, Button, Flex, Divider,Spin,message} from 'antd'
 import { locale } from 'primereact/api';
 import axios from 'axios'
+import { S3Client, GetObjectCommand, PutObjectCommand} from "@aws-sdk/client-s3"
+
+const s3Client = new S3Client(
+    {
+        region: "ap-southeast-2",
+        credentials: {
+            accessKeyId: "AKIA6GBMH2D2BIDTD3O7",
+            secretAccessKey: "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"
+    }
+});
+
+function generateRandomFileName(extension = 'png') {
+    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    const length = 12; // Length of the random string
+    let result = '';
+
+    for (let i = 0; i < length; i++) {
+        result += characters.charAt(Math.floor(Math.random() * characters.length));
+    }
+
+    if (extension) {
+        // Ensure the extension starts with a dot
+        if (!extension.startsWith('.')) {
+            extension = '.' + extension;
+        }
+        result += extension;
+    }
+
+    return result;
+}
+async function putObjectFromUrl(imageUrl, fileName, contentType) {
+    // Step 1: Fetch the image from the provided URL
+    const response = await fetch(imageUrl);
+    if (!response.ok) {
+        throw new Error(`Failed to fetch image from URL: ${response.statusText}`);
+    }
+
+    const imageBuffer = await response.blob();
+
+    // Step 2: Upload the fetched image to S3
+    const command = new PutObjectCommand({
+        Bucket: "incog-files.dev",
+        Key: `uploads/` + fileName,
+        Body: imageBuffer,
+        ContentType: contentType
+    });
+
+    await s3Client.send(command);
+    return "https://s3.ap-southeast-2.amazonaws.com/incog-files.dev/uploads/" + fileName
+}
+
+
 
 const options = {
     apiKey: "public_FW25cBk8bJZGqwaNxFuyEHKVXCPq", // This is your API key.
@@ -26,10 +78,10 @@ const options = {
   };
 
   
-const API_BASE_URL = "https://fashious-flask-backend.vercel.app/"
+const API_BASE_URL = "http://127.0.0.1:5000"
 
 
-export default function FileSection({setreplicateURLs, }) {
+export default function FileSection({setreplicateURLs, setfilesAvailable, setpictureURL, setURLAvailable}) {
     const [garmentFile, setgarmentFile] = useState("")
     const [modelFile, setmodelFile] = useState("")
     const [garmentUploaded, setGarmentUploaded] = useState(false);
@@ -57,6 +109,7 @@ export default function FileSection({setreplicateURLs, }) {
         if (garmentFile!=""){
             if(modelFile!=""){
                 try{
+                    const filename = generateRandomFileName()
 
                     success("It takes upto 3 minutes. Take a back")
                     setloading(true)
@@ -68,10 +121,15 @@ export default function FileSection({setreplicateURLs, }) {
                     console.log(response["data"])
                     setreplicateURLs(response["data"])
                     setfilesAvailable(true)
+                    const pictureURL = await putObjectFromUrl(response["data"][0],filename, "image/png")
+                    console.log(pictureURL)
+
+                    setpictureURL(pictureURL)
+                    setURLAvailable(true)
                 }
-                catch(error)
+                catch(error2)
                 {
-                    error("Error: " + error.message)
+                    error("Error: " + error2.message)
                 }
                 finally{
                     setloading(false)

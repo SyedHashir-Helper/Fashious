@@ -10,9 +10,11 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.637.0",
     "@bytescale/upload-widget-react": "^4.19.0",
     "antd": "^5.20.3",
     "axios": "^1.7.7",
+    "node-fetch": "^3.3.2",
     "primereact": "^10.8.2",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"

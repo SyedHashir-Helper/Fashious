@@ -6,6 +6,7 @@ import { Row ,Col} from 'antd'
 import ImageGradient from './Components/ImageGradient'
 import ReplicateImages from './Components/ReplicateImages'
 import axios from 'axios'
+import BackgroundGeneratedImages from './Components/BackgroundGeneratedImages'
 
 const styles = [
 {backgroundImage: "linear-gradient(to right, #ffecd2 0%, #fcb69f 100%)"},
@@ -45,6 +46,9 @@ function App() {
   const [count, setCount] = useState(0)
   const [replicateURLs,setreplicateURLs] = useState([])
   const [filesAvailable, setfilesAvailable] = useState(false)
+  const [pictureURL, setpictureURL] = useState("")
+  const [URLAvailable, setURLAvailable] = useState(false)
+
 
   return (
     <>
@@ -55,19 +59,28 @@ function App() {
         </Col>
       </Row>
       <FileSection setreplicateURLs={setreplicateURLs}
-                   setfilesAvailable={setfilesAvailable} />
+                   setfilesAvailable={setfilesAvailable}
+                   setpictureURL={setpictureURL}
+                   setURLAvailable={setURLAvailable}/>
 
       {  filesAvailable && (
         <ReplicateImages replicateURLs={replicateURLs} />
       )
       }
+      {
+        URLAvailable && (
+          <BackgroundGeneratedImages
+            pictureURL={pictureURL}
+          />
+        )
+      }
       {/* <Row>
         {
           styles.map((element)=>{
             return (
-              <Col md={8} lg={8}>
+              <Col md={8} lg={8} style={{padding: "1em"}}>
                 <ImageGradient
-                  css={element}
+
                   />
               </Col>
             )
