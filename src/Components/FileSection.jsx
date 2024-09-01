@@ -15,8 +15,8 @@ const s3Client = new S3Client(
     {
         region: "ap-southeast-2",
         credentials: {
-            accessKeyId: "AKIA6GBMH2D2BIDTD3O7",
-            secretAccessKey: "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"
+            accessKeyId: process.env.REACT_APP_AWS_ACCESS_KEY_ID,
+            secretAccessKey: process.env.REACT_APP_AWS_SECRET_ACCESS_KEY
     }
 });
 
